@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Hitmo Planner — Admin</title>
+<script src="https://cdn.tailwindcss.com"></script><link rel="stylesheet" href="css/style.css"><script src="https://unpkg.com/lucide@latest"></script><script src="js/i18n.js"></script><script src="js/auth.js"></script><script src="js/apiClient.js"></script></head>
+<body class="bg-mesh-dark text-slate-100 min-h-screen p-5 md:p-10"><div class="fixed top-4 right-4 z-50"><select id="pageLanguage" class="form-input text-xs w-auto"><option value="en">English</option><option value="hi">हिन्दी</option><option value="mr">मराठी</option><option value="es">Español</option><option value="fr">Français</option><option value="pt">Português</option></select></div>
+<div class="max-w-6xl mx-auto">
+<header class="flex flex-wrap items-center justify-between gap-4 mb-8"><div><p class="text-xs uppercase tracking-widest text-indigo-400" data-i18n="administration">Administration</p><h1 class="text-3xl font-bold mt-1">Hitmo Planner</h1><p id="adminName" class="text-sm text-slate-500 mt-1"></p></div><div class="flex gap-2"><a href="/app" class="px-4 py-2 rounded-xl bg-slate-800 text-sm" data-i18n="openApp">Open App</a><button id="logout" class="px-4 py-2 rounded-xl bg-rose-600 text-sm font-semibold" data-i18n="logout">Logout</button></div></header>
+<div id="status" class="text-sm text-slate-400 mb-4">Loading...</div>
+<div class="grid sm:grid-cols-3 gap-4 mb-8">
+<div class="glass-card p-5 rounded-2xl"><p class="text-xs text-slate-500" data-i18n="users">Users</p><p id="users" class="text-3xl font-bold mt-2">—</p></div>
+<div class="glass-card p-5 rounded-2xl"><p class="text-xs text-slate-500" data-i18n="tasks">Tasks</p><p id="tasks" class="text-3xl font-bold mt-2">—</p></div>
+<div class="glass-card p-5 rounded-2xl"><p class="text-xs text-slate-500" data-i18n="completed">Completed</p><p id="completed" class="text-3xl font-bold mt-2">—</p></div>
+</div>
+<div class="glass-card rounded-2xl overflow-hidden"><div class="p-5 border-b border-slate-700/50"><h2 class="font-bold" data-i18n="users">Users</h2></div><div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-left text-slate-500"><th class="p-4">Name</th><th class="p-4">Email</th><th class="p-4">Role</th><th class="p-4">Created</th></tr></thead><tbody id="userRows"></tbody></table></div></div>
+</div>
+<script>
+(async()=>{
+ const ok=await authManager.isAuthenticated(); const user=authManager.getUser();
+ if(!ok || user?.role!=='ADMIN'){location.replace('/admin-login.html');return;}
+ document.getElementById('adminName').textContent=`Signed in as ${user.name} (${user.email})`;
+ try{
+  const stats=await apiClient.request('/admin/stats'); document.getElementById('users').textContent=stats.users;document.getElementById('tasks').textContent=stats.tasks;document.getElementById('completed').textContent=stats.completed;
+  const users=await apiClient.request('/admin/users'); document.getElementById('userRows').innerHTML=users.map(u=>`<tr class="border-t border-slate-800"><td class="p-4">${u.name}</td><td class="p-4 text-slate-400">${u.email}</td><td class="p-4">${u.role}</td><td class="p-4 text-slate-500">${new Date(u.createdAt).toLocaleDateString()}</td></tr>`).join('');
+  document.getElementById('status').textContent='System healthy';
+ }catch(e){document.getElementById('status').textContent=e.message}
+})();
+document.getElementById('logout').onclick=()=>authManager.logout();
+lucide.createIcons();
+</script><script>document.documentElement.classList.toggle("light",localStorage.getItem("theme")==="light");document.documentElement.classList.toggle("dark",localStorage.getItem("theme")!=="light");document.addEventListener("DOMContentLoaded",()=>{if(window.i18n){i18n.applyLanguage();const s=document.getElementById("pageLanguage");if(s){s.value=i18n.getCurrentLanguage();s.onchange=()=>i18n.setLanguage(s.value);}}});</script></body></html>

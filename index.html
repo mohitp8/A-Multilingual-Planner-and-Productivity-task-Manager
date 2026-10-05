@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hitmo's Planner — Executive Performance Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: { 850: '#151f30', 900: '#0f172a', 950: '#080c16' },
+                        dark: { bg: '#060911', card: '#0c1220', border: '#1e293b', surface: '#172033', hover: '#1e2d47' },
+                        primary: { 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' },
+                        accent: { 500: '#06b6d4', 600: '#0891b2' }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta Sans:wght@300;400;500;600;700;800&family=JetBrains Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-mesh-dark text-slate-900 dark:bg-mesh-dark dark:text-slate-100 font-sans antialiased min-h-screen flex flex-col transition-colors duration-300">
+
+    <!-- Skip Navigation (Accessibility) -->
+    <a href="#mainContent" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-indigo-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg">Skip to main content</a>
+
+    <!-- 🌟 QUOTE TICKER -->
+    <div class="glass-panel bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 text-white border-b border-slate-700/50 dark:border-white/10 py-2.5 px-4 sm:px-6 relative overflow-hidden shadow-lg" role="banner" aria-label="Motivational Quote Ticker">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+                <span id="quoteBadge" class="shrink-0 text-[10px] font-mono font-bold tracking-wider bg-white/10 text-slate-200 px-2.5 py-0.5 rounded-full border border-white/20">⚽ CR7</span>
+                <div class="flex-1 min-w-0">
+                    <p id="quoteText" class="font-medium text-xs sm:text-sm tracking-tight text-slate-100 truncate">"Your love makes me strong, your hate makes me unstoppable."</p>
+                    <p id="quoteAuthor" class="text-[11px] text-slate-400 font-medium truncate mt-0.5">— Cristiano Ronaldo, 5× Ballon d'Or Winner</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+                <span id="quoteCounter" class="text-[10px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">1/18</span>
+                <button onclick="quoteEngine.prev()" class="p-1.5 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-white" title="Previous Quote" aria-label="Previous quote">
+                    <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="quoteEngine.next()" class="p-1.5 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-white" title="Next Quote" aria-label="Next quote">
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="quoteEngine.random()" class="p-1.5 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-white" title="Random Quote" aria-label="Random quote">
+                    <i data-lucide="shuffle" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="quoteEngine.speak()" class="p-1.5 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-white" title="Read Aloud" aria-label="Read quote aloud">
+                    <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="quoteEngine.toggleAutoPlay()" class="p-1.5 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-white" title="Toggle Auto Play" aria-label="Toggle auto play">
+                    <i data-lucide="pause" class="w-3.5 h-3.5" id="autoPlayBtn"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="app-header" role="banner">
+        <div class="flex items-center justify-between px-4 lg:px-8 py-3">
+            <div class="flex items-center gap-3">
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleSidebar()" class="mobile-menu-btn p-2 rounded-lg glass-card text-slate-400 hover:text-white transition-colors" aria-label="Toggle navigation menu">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-cyan-600 text-white items-center justify-center font-bold text-base shadow-lg shadow-indigo-500/20">
+                    <i data-lucide="check-square" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-base font-bold tracking-tight text-white font-display">Hitmo's Planner</h1>
+                        <span class="text-[9px] uppercase font-mono font-bold tracking-widest px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/20">Enterprise</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 hidden sm:block"><span data-i18n="appSubtitle">Executive Performance & Task Management</span></p>
+                </div>
+            </div>
+
+            <!-- Global Actions -->
+            <div class="flex items-center gap-2">
+                <!-- Search -->
+                <div class="relative hidden sm:block w-56 md:w-72">
+                    <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                    <input type="text" id="globalSearch" placeholder="Search tasks... (Ctrl+K)" data-i18n-placeholder="searchPlaceholder"
+                        class="form-input form-input-glow pl-9 pr-9 py-2 bg-slate-800/50 border-slate-700/50 text-sm focus:ring-indigo-500/30 text-slate-100 placeholder-slate-500">
+                    <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-mono text-slate-500 bg-slate-700/50 px-1.5 py-0.5 rounded">⌘K</span>
+                </div>
+
+                <!-- Language Switcher -->
+                <div class="relative">
+                    <button onclick="toggleLanguageMenu()" class="p-2 rounded-lg glass-card text-slate-400 hover:text-white transition-all hover:bg-slate-700/50" data-i18n-title="changeLanguage" title="Change Language" aria-label="Change language">
+                        <i data-lucide="globe" class="w-4 h-4"></i>
+                    </button>
+                    <!-- Language Menu -->
+                    <div id="languageMenu" class="hidden absolute right-0 mt-2 w-48 glass-elevated rounded-xl shadow-2xl p-2 z-50">
+                        <p class="px-3 py-2 text-[10px] uppercase tracking-widest text-slate-500" data-i18n="selectLanguage">Select language</p>
+                        <button onclick="changeLanguage('en')" class="lang-option">🇺🇸 <span>English</span></button>
+                        <button onclick="changeLanguage('hi')" class="lang-option">🇮🇳 <span>हिन्दी</span></button>
+                        <button onclick="changeLanguage('mr')" class="lang-option">🇮🇳 <span>मराठी</span></button>
+                        <button onclick="changeLanguage('es')" class="lang-option">🇪🇸 <span>Español</span></button>
+                        <button onclick="changeLanguage('fr')" class="lang-option">🇫🇷 <span>Français</span></button>
+                        <button onclick="changeLanguage('pt')" class="lang-option">🇵🇹 <span>Português</span></button>
+                    </div>
+                </div>
+
+                <!-- Auth / User Actions (Filled by app.js) -->
+                <div id="authActionsPlaceholder" class="flex items-center gap-2"></div>
+
+                <!-- Pomodoro -->
+                <button onclick="togglePomodoroWidget()" class="relative p-2 rounded-lg glass-card text-slate-400 hover:text-white transition-all hover:bg-slate-700/50" data-i18n-title="openFocusTimer" title="Focus Timer" aria-label="Open focus timer">
+                    <i data-lucide="timer" class="w-4 h-4"></i>
+                    <span id="pomoBadge" class="hidden absolute -top-0.5 -right-0.5 w-2 h-2 bg-rose-500 rounded-full animate-pulse"></span>
+                </button>
+
+                <!-- Theme Toggle -->
+                <button id="themeToggle" onclick="toggleTheme()" class="p-2 rounded-lg glass-card text-slate-400 hover:text-white transition-all hover:bg-slate-700/50" data-i18n-title="toggleTheme" title="Toggle Theme" aria-label="Toggle dark/light theme">
+                    <i data-lucide="sun" class="w-4 h-4 dark:hidden"></i>
+                    <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+                </button>
+
+                <!-- Voice Input -->
+                <button id="voiceMicButton" onclick="toggleVoiceInput()" class="p-2 rounded-lg glass-card text-slate-400 hover:text-white transition-all hover:bg-slate-700/50" data-i18n-title="voiceInput" title="Voice Input" aria-label="Voice input">
+                    <i data-lucide="mic" class="w-4 h-4"></i>
+                </button>
+
+                <!-- Assistant -->
+                <button onclick="hitmoAssistant.toggle()" class="relative p-2 rounded-xl bg-gradient-to-br from-indigo-600 to-cyan-600 text-white hover:opacity-90 transition-all shadow-lg shadow-indigo-500/20 arc-reactor-glow" title="Hitmo Assistant" aria-label="Open AI Assistant">
+                    <i data-lucide="bot" class="w-4 h-4"></i>
+                    <span id="assistantBadge" class="hidden absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- App Body -->
+    <div class="flex-1 flex overflow-hidden">
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="app-sidebar" role="navigation" aria-label="Main navigation">
+            <div class="space-y-6">
+                <!-- Views -->
+                <div class="space-y-1">
+                    <p class="text-[10px] font-mono uppercase tracking-widest text-slate-500 px-3 mb-2 font-semibold" data-i18n="workspace">Workspace</p>
+                    <button onclick="switchView('board')" class="nav-item active w-full" data-view="board">
+                        <i data-lucide="workflow" class="w-4 h-4"></i>
+                        <span data-i18n="flowBoard">Flow Board</span>
+                        <span id="boardCount" class="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">0</span>
+                    </button>
+                    <button onclick="switchView('list')" class="nav-item w-full" data-view="list">
+                        <i data-lucide="list" class="w-4 h-4"></i>
+                        <span data-i18n="tableView">Table View</span>
+                        <span id="listCount" class="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">0</span>
+                    </button>
+                    <button onclick="switchView('matrix')" class="nav-item w-full" data-view="matrix">
+                        <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                        <span data-i18n="eisenhowerMatrix">Eisenhower Matrix</span>
+                    </button>
+                    <button onclick="switchView('calendar')" class="nav-item w-full" data-view="calendar">
+                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                        <span data-i18n="calendar">Calendar</span>
+                    </button>
+                    <button onclick="switchView('analytics')" class="nav-item w-full" data-view="analytics">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                        <span data-i18n="performance">Performance</span>
+                    </button>
+                </div>
+
+                <!-- Categories -->
+                <div class="space-y-1">
+                    <p class="text-[10px] font-mono uppercase tracking-widest text-slate-500 px-3 mb-2 font-semibold" data-i18n="categories">Categories</p>
+                    <button onclick="filterCategory('ALL')" class="cat-filter active nav-item w-full" data-cat="ALL">
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                        <span data-i18n="allItems">All Items</span>
+                    </button>
+                    <button onclick="filterCategory('WORK')" class="cat-filter nav-item w-full" data-cat="WORK">
+                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                        <span data-i18n="work">Work & Strategy</span>
+                    </button>
+                    <button onclick="filterCategory('STUDY')" class="cat-filter nav-item w-full" data-cat="STUDY">
+                        <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
+                        <span data-i18n="study">Technical & Study</span>
+                    </button>
+                    <button onclick="filterCategory('PERSONAL')" class="cat-filter nav-item w-full" data-cat="PERSONAL">
+                        <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                        <span data-i18n="personal">Personal</span>
+                    </button>
+                    <button onclick="filterCategory('FINANCE')" class="cat-filter nav-item w-full" data-cat="FINANCE">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        <span data-i18n="finance">Finance & Capital</span>
+                    </button>
+                    <button onclick="filterCategory('HEALTH')" class="cat-filter nav-item w-full" data-cat="HEALTH">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span data-i18n="health">Fitness & Health</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bottom Progress -->
+            <div class="mt-auto glass-card p-4 rounded-xl">
+                <div class="flex items-center justify-between mb-2 text-xs">
+                    <span class="text-slate-400 font-semibold" data-i18n="completion">Completion</span>
+                    <span id="rateLabel" class="font-mono text-indigo-400 font-bold shimmer-text">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="progressBar" class="progress-bar-fill" style="width: 0%"></div>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-2.5 font-mono">
+                    <span id="doneCountText" class="text-slate-300 font-semibold">0</span> / <span id="totalCountText" class="text-slate-300 font-semibold">0</span> <span data-i18n="doneCount">Completed</span>
+                </p>
+            </div>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-20 hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
+
+        <!-- Main Workspace -->
+        <main id="mainContent" class="flex-1 overflow-y-auto p-4 lg:p-8 space-y-6">
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 stagger-children">
+                <div class="glass-card p-5 rounded-xl kpi-card animate-fadeInUp" style="animation-delay:50ms">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="kpi-label" data-i18n="totalTasks">Total Tasks</span>
+                        <div class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center"><i data-lucide="square-check" class="w-4 h-4 text-indigo-400"></i></div>
+                    </div>
+                    <h3 id="statTotal" class="kpi-value text-white">0</h3>
+                </div>
+                <div class="glass-card p-5 rounded-xl kpi-card cr7-glow animate-fadeInUp" style="animation-delay:100ms">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="kpi-label" data-i18n="completedTasks">Completed</span>
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i></div>
+                    </div>
+                    <h3 id="statCompleted" class="kpi-value text-emerald-400">0</h3>
+                </div>
+                <div class="glass-card p-5 rounded-xl kpi-card animate-fadeInUp" style="animation-delay:150ms">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="kpi-label" data-i18n="pendingTasks">Pending</span>
+                        <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center"><i data-lucide="clock" class="w-4 h-4 text-amber-400"></i></div>
+                    </div>
+                    <h3 id="statPending" class="kpi-value text-amber-400">0</h3>
+                </div>
+                <div class="glass-card p-5 rounded-xl kpi-card animate-fadeInUp" style="animation-delay:200ms">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="kpi-label" data-i18n="overdueTasks">Overdue</span>
+                        <div class="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center"><i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i></div>
+                    </div>
+                    <h3 id="statOverdue" class="kpi-value text-rose-400">0</h3>
+                </div>
+            </div>
+
+            <!-- View 1: Flow Board -->
+            <section id="view-board" class="view-panel" role="region" aria-label="Flow Board">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-card rounded-xl p-5 flex flex-col max-h-[78vh]">
+                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-700/50">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-slate-400 animate-pulse"></span>
+                                <h3 class="font-bold text-xs uppercase tracking-wider text-slate-300" data-i18n="toDo">To Do</h3>
+                            </div>
+                            <span id="colCount-TODO" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">0</span>
+                        </div>
+                        <div id="drop-TODO" class="task-col flex-1 overflow-y-auto space-y-3 p-1 min-h-[250px] rounded-lg" ondragover="handleDragOver(event)" ondrop="handleDrop(event, 'TODO')" role="list" aria-label="To Do tasks"></div>
+                    </div>
+                    <div class="glass-card rounded-xl p-5 flex flex-col max-h-[78vh] arc-reactor-glow">
+                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-700/50">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
+                                <h3 class="font-bold text-xs uppercase tracking-wider text-slate-300" data-i18n="inProgress">In Progress</h3>
+                            </div>
+                            <span id="colCount-IN_PROGRESS" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">0</span>
+                        </div>
+                        <div id="drop-IN_PROGRESS" class="task-col flex-1 overflow-y-auto space-y-3 p-1 min-h-[250px] rounded-lg" ondragover="handleDragOver(event)" ondrop="handleDrop(event, 'IN_PROGRESS')" role="list" aria-label="In Progress tasks"></div>
+                    </div>
+                    <div class="glass-card rounded-xl p-5 flex flex-col max-h-[78vh]">
+                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-700/50">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <h3 class="font-bold text-xs uppercase tracking-wider text-slate-300" data-i18n="completed">Completed</h3>
+                            </div>
+                            <span id="colCount-COMPLETED" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">0</span>
+                        </div>
+                        <div id="drop-COMPLETED" class="task-col flex-1 overflow-y-auto space-y-3 p-1 min-h-[250px] rounded-lg" ondragover="handleDragOver(event)" ondrop="handleDrop(event, 'COMPLETED')" role="list" aria-label="Completed tasks"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- View 2: Table -->
+            <section id="view-list" class="view-panel hidden" role="region" aria-label="Table View">
+                <div class="glass-card rounded-xl overflow-hidden">
+                    <div class="p-4 border-b border-slate-700/50 flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <h3 class="font-bold text-xs uppercase tracking-wider text-slate-300" data-i18n="taskDescription">Database Record</h3>
+                            <span id="tableResultsCount" class="text-[10px] font-mono bg-slate-800 text-slate-400 px-2 py-0.5 rounded">0 items</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <select id="priorityFilterSelect" onchange="filterPriority(this.value)" class="form-input form-input-glow form-select py-1.5 bg-slate-800/50 border-slate-700/50 text-xs text-slate-200">
+                                <option value="ALL" data-i18n="allPriorities">All Priorities</option>
+                                <option value="URGENT" data-i18n="urgent">Urgent</option>
+                                <option value="HIGH" data-i18n="high">High</option>
+                                <option value="MEDIUM" data-i18n="medium">Medium</option>
+                                <option value="LOW" data-i18n="low">Low</option>
+                            </select>
+                            <button onclick="exportTasksCSV()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/50 border border-slate-700/50 rounded-lg text-xs font-semibold text-slate-300 hover:bg-slate-700/50 transition-colors">
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                                <span data-i18n="exportCSV">Export CSV</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="border-b border-slate-700/50 bg-slate-800/30 text-slate-400 uppercase tracking-wider font-semibold">
+                                    <th class="p-4 w-10 text-center" data-i18n="status">Status</th>
+                                    <th class="p-4" data-i18n="taskDescription">Task Description</th>
+                                    <th class="p-4" data-i18n="category">Category</th>
+                                    <th class="p-4" data-i18n="priority">Priority</th>
+                                    <th class="p-4" data-i18n="deadline">Deadline</th>
+                                    <th class="p-4" data-i18n="pomodoro">Pomodoro</th>
+                                    <th class="p-4 text-right" data-i18n="actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="taskTableBody" class="divide-y divide-slate-700/30"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- View 3: Matrix -->
+            <section id="view-matrix" class="view-panel hidden" role="region" aria-label="Eisenhower Matrix">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="p-5 rounded-xl bg-rose-500/5 border border-rose-500/20 flex flex-col min-h-[260px]">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2 text-rose-400 font-bold text-xs uppercase tracking-wider"><i data-lucide="alert-circle" class="w-4 h-4"></i><span data-i18n="doFirst">Do First</span></div>
+                            <span id="matrix-q1-count" class="text-[10px] font-mono font-bold bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded">0</span>
+                        </div>
+                        <div id="matrix-q1" class="space-y-2 flex-1 overflow-y-auto" role="list"></div>
+                    </div>
+                    <div class="p-5 rounded-xl bg-blue-500/5 border border-blue-500/20 flex flex-col min-h-[260px]">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2 text-blue-400 font-bold text-xs uppercase tracking-wider"><i data-lucide="calendar" class="w-4 h-4"></i><span data-i18n="schedule">Schedule</span></div>
+                            <span id="matrix-q2-count" class="text-[10px] font-mono font-bold bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded">0</span>
+                        </div>
+                        <div id="matrix-q2" class="space-y-2 flex-1 overflow-y-auto" role="list"></div>
+                    </div>
+                    <div class="p-5 rounded-xl bg-amber-500/5 border border-amber-500/20 flex flex-col min-h-[260px]">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider"><i data-lucide="users" class="w-4 h-4"></i><span data-i18n="delegate">Delegate</span></div>
+                            <span id="matrix-q3-count" class="text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded">0</span>
+                        </div>
+                        <div id="matrix-q3" class="space-y-2 flex-1 overflow-y-auto" role="list"></div>
+                    </div>
+                    <div class="p-5 rounded-xl bg-slate-500/5 border border-slate-500/20 flex flex-col min-h-[260px]">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2 text-slate-400 font-bold text-xs uppercase tracking-wider"><i data-lucide="archive" class="w-4 h-4"></i><span data-i18n="eliminate">Eliminate</span></div>
+                            <span id="matrix-q4-count" class="text-[10px] font-mono font-bold bg-slate-500/10 text-slate-400 px-2 py-0.5 rounded">0</span>
+                        </div>
+                        <div id="matrix-q4" class="space-y-2 flex-1 overflow-y-auto" role="list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- View 4: Calendar -->
+            <section id="view-calendar" class="view-panel hidden" role="region" aria-label="Calendar">
+                <div class="glass-card rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 id="calendarMonthYear" class="text-sm font-bold text-white font-display" data-i18n="calendarSchedule">Calendar Schedule</h3>
+                            <p class="text-[11px] text-slate-500" data-i18n="deadlinesMilestones">Deadlines and milestone roadmap</p>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="changeMonth(-1)" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors text-slate-300" aria-label="Previous month"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                            <button onclick="changeMonth(1)" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors text-slate-300" aria-label="Next month"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1.5 text-center text-[10px] font-mono font-bold text-slate-500 mb-2">
+                        <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+                    </div>
+                    <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 min-h-[380px]" role="grid"></div>
+                </div>
+            </section>
+
+            <!-- View 5: Analytics -->
+            <section id="view-analytics" class="view-panel hidden" role="region" aria-label="Performance Analytics">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-card p-6 rounded-xl">
+                        <h3 class="font-bold text-xs uppercase tracking-wider text-slate-300 mb-4" data-i18n="categoryAllocation">Category Allocation</h3>
+                        <div class="h-64 relative"><canvas id="categoryChart"></canvas></div>
+                    </div>
+                    <div class="glass-card p-6 rounded-xl">
+                        <h3 class="font-bold text-xs uppercase tracking-wider text-slate-300 mb-4" data-i18n="priorityDistribution">Priority Distribution</h3>
+                        <div class="h-64 relative"><canvas id="priorityChart"></canvas></div>
+                    </div>
+                </div>
+                <div class="glass-card p-6 rounded-xl bg-gradient-to-br from-indigo-900/40 via-slate-900/40 to-slate-900/40 text-white arc-reactor-glow mt-6">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+                        <div>
+                            <span class="text-[10px] font-mono font-bold tracking-widest text-cyan-400 uppercase">Executive Audit</span>
+                            <h2 class="text-xl font-bold mt-1 font-display" data-i18n="highFocusVelocity">High Focus Execution Velocity</h2>
+                            <p class="text-xs text-slate-400 mt-1" data-i18n="systemCalibrated">System is calibrated for maximum output and minimal friction.</p>
+                        </div>
+                        <div class="flex items-center gap-8">
+                            <div class="text-center"><p class="text-3xl font-bold font-mono text-emerald-400" id="scoreValue">0%</p><p class="text-[9px] font-mono text-slate-400 uppercase tracking-wider mt-0.5" data-i18n="executionScore">Execution Score</p></div>
+                            <div class="text-center"><p class="text-3xl font-bold font-mono text-white" id="totalPomoValue">0</p><p class="text-[9px] font-mono text-slate-400 uppercase tracking-wider mt-0.5" data-i18n="focusCycles">Focus Cycles</p></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Pomodoro Widget -->
+    <div id="pomodoroModal" class="fixed bottom-6 right-6 z-50 hidden" role="dialog" aria-label="Focus Timer">
+        <div class="w-72 rounded-xl glass-elevated shadow-2xl p-5 space-y-4 arc-reactor-glow animate-slideUp">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-700/50">
+                <div class="flex items-center gap-2"><i data-lucide="timer" class="w-4 h-4 text-slate-400"></i><span class="font-bold text-xs uppercase tracking-wider text-slate-200" data-i18n="focusTimer">Focus Timer</span></div>
+                <button onclick="togglePomodoroWidget()" class="text-slate-500 hover:text-slate-300 transition-colors" aria-label="Close timer"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="text-center py-2">
+                <span id="timerDisplay" class="text-4xl font-extrabold font-mono tracking-tighter text-white">25:00</span>
+                <p id="timerMode" class="text-[10px] text-slate-400 mt-1 font-mono uppercase" data-i18n="deepWorkInterval">Deep Work Interval</p>
+            </div>
+            <div class="flex items-center justify-center gap-2">
+                <button id="timerToggleBtn" onclick="toggleTimer()" class="px-5 py-2 rounded-lg bg-gradient-to-br from-indigo-600 to-cyan-600 text-white font-semibold text-sm shadow-lg hover:shadow-xl transition-all">
+                    <span data-i18n="start">Start</span>
+                </button>
+                <button onclick="resetTimer()" class="p-2 rounded-lg glass-card text-slate-500 hover:text-slate-300 transition-colors" aria-label="Reset timer"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Assistant Panel -->
+    <div id="assistantPanel" class="fixed bottom-6 right-6 sm:right-20 z-50 w-[92vw] sm:w-96 rounded-2xl glass-elevated shadow-2xl flex flex-col h-[520px] overflow-hidden hidden animate-slideUp" role="dialog" aria-label="Hitmo Assistant">
+        <div class="p-4 border-b border-slate-700/50 bg-gradient-to-r from-indigo-900/60 to-slate-900/60 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg gradient-bg-primary flex items-center justify-center shadow-lg"><i data-lucide="bot" class="w-4 h-4 text-white"></i></div>
+                <div><h4 class="font-bold text-sm text-white" data-i18n="hitmoAssistant">Hitmo Assistant</h4><p class="text-[10px] text-slate-400 font-mono" data-i18n="productivityIntelligence">Productivity Intelligence</p></div>
+            </div>
+            <div class="flex items-center gap-1">
+                <button id="voiceIcon" onclick="hitmoAssistant.toggleVoice()" class="p-1.5 rounded text-emerald-400 hover:text-white transition-colors" title="Toggle Voice" aria-label="Toggle voice output"><i data-lucide="volume-2" class="w-3.5 h-3.5"></i></button>
+                <button onclick="hitmoAssistant.toggle()" class="p-1.5 rounded text-slate-400 hover:text-white transition-colors" aria-label="Close assistant"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+            </div>
+        </div>
+        <div id="conversationLog" class="flex-1 p-4 overflow-y-auto space-y-3 text-xs" role="log" aria-live="polite"></div>
+        <div id="typingIndicator" class="px-4 py-2 text-[11px] text-slate-400 italic flex items-center gap-1.5 hidden">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-bounce"></span><span class="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" style="animation-delay:0.2s"></span><span class="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" style="animation-delay:0.4s"></span>
+            <span>Hitmo Assistant is thinking...</span>
+        </div>
+        <div id="assistantPills" class="p-2 border-t border-slate-700/50 flex items-center gap-1.5 overflow-x-auto bg-slate-800/30"></div>
+        <div class="p-3 border-t border-slate-700/50 flex items-center gap-2">
+            <input type="text" id="assistantInput" placeholder="Ask assistant or 'Add task: ...'" data-i18n-placeholder="askAssistant"
+                onkeydown="if(event.key === 'Enter') hitmoAssistant.sendMessage()"
+                class="flex-1 px-3 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none text-slate-100 placeholder-slate-500">
+            <button id="assistantVoiceButton" onclick="toggleVoiceInput()" class="p-2 rounded-lg glass-card text-slate-500 hover:text-slate-300 transition-colors" aria-label="Voice input"><i data-lucide="mic" class="w-3.5 h-3.5"></i></button>
+            <button onclick="hitmoAssistant.sendMessage()" class="p-2 rounded-lg bg-gradient-to-br from-indigo-600 to-cyan-600 text-white hover:opacity-90 transition-all shadow-md" aria-label="Send message"><i data-lucide="send" class="w-3.5 h-3.5"></i></button>
+        </div>
+    </div>
+
+    <!-- Floating Chatbot Button -->
+    <button onclick="hitmoAssistant.toggle()" class="fixed bottom-6 right-6 z-40 p-4 rounded-2xl gradient-bg-primary text-white shadow-2xl hover:shadow-indigo-500/20 hover:scale-110 transition-all duration-300 arc-reactor-glow flex items-center justify-center" aria-label="Open AI Assistant">
+        <i data-lucide="bot" class="w-6 h-6"></i>
+    </button>
+
+    <!-- Task Modal -->
+    <div id="taskModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Create Task">
+        <div class="modal-content">
+            <div class="p-5 border-b border-slate-700/50 flex items-center justify-between bg-gradient-to-r from-slate-800/50 to-slate-900/50 rounded-t-xl">
+                <h3 id="modalTitle" class="text-sm font-bold text-white font-display" data-i18n="createTask">Create Task</h3>
+                <button onclick="closeTaskModal()" class="p-1.5 rounded-lg hover:bg-slate-700/50 transition-colors text-slate-400 hover:text-white" aria-label="Close modal"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <form id="taskForm" onsubmit="handleFormSubmit(event)" class="p-5 space-y-4">
+                <input type="hidden" id="taskId">
+                <div class="input-shine">
+                    <label class="form-label" data-i18n="taskTitle">Title</label>
+                    <input type="text" id="taskTitle" required placeholder="e.g., Deliver Quarterly Architecture Spec" data-i18n-placeholder="taskTitlePlaceholder" class="form-input form-input-glow">
+                </div>
+                <div class="input-shine">
+                    <label class="form-label" data-i18n="description">Details / Notes</label>
+                    <textarea id="taskDesc" rows="2.5" placeholder="Context, sub-items, or deliverables..." data-i18n-placeholder="descriptionPlaceholder" class="form-input form-input-glow resize-none"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="input-shine">
+                        <label class="form-label" data-i18n="priority">Priority</label>
+                        <select id="taskPriority" class="form-input form-input-glow form-select">
+                            <option value="LOW" data-i18n="low">Low</option>
+                            <option value="MEDIUM" selected data-i18n="medium">Medium</option>
+                            <option value="HIGH" data-i18n="high">High</option>
+                            <option value="URGENT" data-i18n="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    <div class="input-shine">
+                        <label class="form-label" data-i18n="category">Category</label>
+                        <select id="taskCategory" class="form-input form-input-glow form-select">
+                            <option value="WORK" data-i18n="work">Work & Strategy</option>
+                            <option value="STUDY" data-i18n="study">Technical & Study</option>
+                            <option value="PERSONAL" data-i18n="personal">Personal</option>
+                            <option value="FINANCE" data-i18n="finance">Finance & Capital</option>
+                            <option value="HEALTH" data-i18n="health">Fitness & Health</option>
+                            <option value="SHOPPING" data-i18n="shopping">Shopping</option>
+                            <option value="OTHER" data-i18n="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="input-shine">
+                        <label class="form-label" data-i18n="deadline">Deadline</label>
+                        <input type="date" id="taskDeadline" class="form-input form-input-glow">
+                    </div>
+                    <div class="input-shine">
+                        <label class="form-label" data-i18n="tags">Tags</label>
+                        <input type="text" id="taskTags" placeholder="strategy, backend" data-i18n-placeholder="tagsPlaceholder" class="form-input form-input-glow">
+                    </div>
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-700/50">
+                    <button type="button" onclick="closeTaskModal()" class="px-4 py-2 rounded-lg border border-slate-700/50 text-xs font-semibold text-slate-300 hover:bg-slate-800/50 transition-colors" data-i18n="cancel">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-lg bg-gradient-to-br from-indigo-600 to-cyan-600 text-white text-xs font-bold hover:opacity-90 shadow-lg shadow-indigo-500/20" data-i18n="saveTask">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container" role="status" aria-live="polite"></div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="audio/suiii.js"></script>
+    <script src="js/voice.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/quotes.js"></script>
+    <script src="js/chatbot.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/apiClient.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/app-extensions.js"></script>
+</body>
+</html>

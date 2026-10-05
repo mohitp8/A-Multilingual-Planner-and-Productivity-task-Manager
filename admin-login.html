@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Hitmo's Planner — Admin Login</title>
+<script src="https://cdn.tailwindcss.com"></script><link rel="stylesheet" href="css/style.css"><script src="https://unpkg.com/lucide@latest"></script>
+<script src="js/i18n.js"></script><script src="js/auth.js"></script>
+</head>
+<body class="bg-dark-bg text-slate-100 min-h-screen flex items-center justify-center p-4"><div class="fixed top-4 right-4 z-50"><select id="pageLanguage" class="form-input text-xs w-auto"><option value="en">English</option><option value="hi">हिन्दी</option><option value="mr">मराठी</option><option value="es">Español</option><option value="fr">Français</option><option value="pt">Português</option></select></div>
+<div class="w-full max-w-md auth-glass rounded-2xl p-8 shadow-2xl" style="background:rgba(12,18,32,.88);border:1px solid rgba(148,163,184,.12)">
+<div class="text-center mb-7"><div class="mx-auto w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-cyan-600 flex items-center justify-center mb-4"><i data-lucide="shield-check"></i></div><h1 class="text-2xl font-bold" data-i18n="adminLogin">Admin Login</h1><p class="text-xs text-slate-500 mt-2" data-i18n="restrictedAdmin">Restricted administrator access</p></div>
+<form id="adminLoginForm" class="space-y-4">
+<input id="email" type="email" required placeholder="Admin email" class="form-input w-full">
+<input id="password" type="password" required placeholder="Password" class="form-input w-full">
+<button class="w-full py-3 rounded-xl bg-gradient-to-br from-indigo-600 to-cyan-600 text-white font-bold" data-i18n="signInAdmin">Sign in as Admin</button>
+<p id="error" class="text-sm text-rose-400 text-center min-h-5"></p>
+</form>
+<p class="text-center text-xs text-slate-500 mt-5"><a href="/login.html" class="text-indigo-400" data-i18n="backUserLogin">Back to user login</a></p>
+</div>
+<script>
+lucide.createIcons();
+document.getElementById('adminLoginForm').addEventListener('submit', async e=>{
+ e.preventDefault(); const err=document.getElementById('error'); err.textContent='';
+ const result=await authManager.login(document.getElementById('email').value,document.getElementById('password').value);
+ if(!result.success){err.textContent=result.error;return;}
+ if(result.user.role!=='ADMIN'){await authManager.logout();err.textContent='This account is not an administrator.';return;}
+ location.replace('/admin.html');
+});
+</script>
+<script>document.documentElement.classList.toggle("light",localStorage.getItem("theme")==="light");document.documentElement.classList.toggle("dark",localStorage.getItem("theme")!=="light");document.addEventListener("DOMContentLoaded",()=>{if(window.i18n){i18n.applyLanguage();const s=document.getElementById("pageLanguage");if(s){s.value=i18n.getCurrentLanguage();s.onchange=()=>i18n.setLanguage(s.value);}}});</script></body></html>

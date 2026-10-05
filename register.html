@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hitmo's Planner — Sign Up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/i18n.js"></script><script src="js/auth.js"></script>
+    <style>
+        .auth-glass { background: rgba(12, 18, 32, 0.85); backdrop-filter: blur(32px); border: 1px solid rgba(148, 163, 184, 0.1); }
+        .gradient-btn { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    </style>
+</head>
+<body class="bg-dark-bg text-slate-100 font-sans min-h-screen flex items-center justify-center p-4"><div class="fixed top-4 right-4 z-50"><select id="pageLanguage" class="form-input text-xs w-auto"><option value="en">English</option><option value="hi">हिन्दी</option><option value="mr">मराठी</option><option value="es">Español</option><option value="fr">Français</option><option value="pt">Português</option></select></div>
+
+    <div class="w-full max-w-md auth-glass rounded-2xl p-8 shadow-2xl">
+        <h1 class="text-2xl font-bold mb-6 text-center" data-i18n="createAccount">Create Account</h1>
+        <form id="registerForm" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1" data-i18n="fullName">Full Name</label>
+                <input type="text" id="name" required class="form-input w-full bg-slate-800 p-2 rounded-lg">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1" data-i18n="email">Email</label>
+                <input type="email" id="email" required class="form-input w-full bg-slate-800 p-2 rounded-lg">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1" data-i18n="password">Password</label>
+                <input type="password" id="password" required class="form-input w-full bg-slate-800 p-2 rounded-lg">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1" data-i18n="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" required class="form-input w-full bg-slate-800 p-2 rounded-lg">
+            </div>
+            <button type="submit" class="gradient-btn w-full py-3 rounded-xl font-bold text-sm" data-i18n="register">Register</button>
+        </form>
+        <p class="text-center text-xs text-slate-400 mt-4">
+            Already have an account? <a href="login.html" class="text-indigo-400 font-semibold">Login</a>
+        </p>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirmPassword').value;
+
+            if (password !== confirm) {
+                alert('Passwords do not match');
+                return;
+            }
+
+            const result = await authManager.register(name, email, password);
+            if (result.success) {
+                window.location.replace('/app');
+            } else {
+                alert(result.error);
+            }
+        });
+    </script>
+<script>document.documentElement.classList.toggle("light",localStorage.getItem("theme")==="light");document.documentElement.classList.toggle("dark",localStorage.getItem("theme")!=="light");document.addEventListener("DOMContentLoaded",()=>{if(window.i18n){i18n.applyLanguage();const s=document.getElementById("pageLanguage");if(s){s.value=i18n.getCurrentLanguage();s.onchange=()=>i18n.setLanguage(s.value);}}});</script></body>
+</html>
