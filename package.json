@@ -1,0 +1,13 @@
+{
+  "name": "hitmo-planner",
+  "version": "6.0.0",
+  "private": true,
+  "description": "Hitmo Planner - multilingual productivity management website",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
